@@ -23,7 +23,7 @@ public class ConnectorController {
 		return connectorService.createMySqlSourceConnector();
 	}
 	
-	@PostMapping("/mysql-sink")
+	@PostMapping("/postgres-sink")
 	public String createPostgresSink() {
 		return connectorService.createPostgreSQLSinkConnector();
 	}
