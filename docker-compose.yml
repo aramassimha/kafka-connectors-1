@@ -1,0 +1,76 @@
+version: '3.8'
+services:
+	zookeeper:
+		image: confluentinc/cp-zookeeper:latest
+		environment:
+			ZOOKEEPER_CLIENT_PORT: 2181
+			ZOOKEEPER_TICK_TIME: 2000
+		ports:
+			- "2181:2181"
+	kafka:
+		image: confluentinc/cp-kafka:latest
+		depends_on:
+			- zookeeper
+		enviroment:
+			KAFKA_BROKER_ID: 1
+			KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+			KAFKA_ADVERTISED_LISTENERS: PLANTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+			KAFKA_LISTENER_SECURITY_PROROCOL_MAP: PLANTEXT:PLANTEXT, PLANTEXT_HOST:PLANTEXT
+			KAFKA_INNER_BROKER_LISTENER_NAME: PLANTEXT
+			KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+		ports:
+			- "9092:9092"
+	kafka-connect:
+		image: confluentinc/cp-kafka-connect:latest
+		depends_on:
+			- kafka
+		environment:
+			CONNECT_BOOTSTRAP_SERVERS: kafka:9092
+			CONNECT_REST_PORT: 8083
+			CONNECT_GROUP_ID: kafka-connect
+			CONNECT_CONFIG_STORAGE_TOPIC: _connect_configs
+			CONNECT_OFFSET_STORAGE_TOPIC: _connect_offsets
+			CONNECT_STATUS_STORAGE_TOPIC: _connect-status
+			CONNECT_KEY_CONVERTER: org.apche.kafka.connect.json.JsonConverter
+			CONNECT_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+			CONNECT_INTERNAL_KEY_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+			CONNECT_INTERNAL_VALUE_CONVERTER: org.apache.kafka.connect.json.JsonConverter
+			CONNECT_REST_ADVERTISED_HOST_NAME: kafka-connect
+			CONNECT_PLUGIN_PATH: /usr/share/java,/usr/share/confluent-hub-components
+		ports:
+			- "8083:8083"
+		command:
+			- bash
+			- -c
+			- |
+			  
+			  confluent-hub install --no-prompt confluentinc/kafka-connect-jdbc:10.7.0
+			  /etc/confluent/docker/run
+			  
+	mysql:
+		image: mysql:8.0
+		environment:
+			MYSQL_ROOT_PASSWORD: password
+			MYSQL_DATEBASE: source_db
+		ports:
+			- "3306:3306"
+		command: --default-authentication-plugin=mysql_native_password
+	postgres:
+		image: postgres:13
+		environment:
+			POSTGRES_DB: sink_db
+			POSTGRES_USER: postgres
+			POSTGRES_PASSWORD: password
+		ports:
+			- "5432:5432"
+			
+	app:
+		build: .
+		ports:
+			- "8080:8080"
+		depends_on:
+			- kafka-connect
+			- mysql
+			- postgres
+		environment:
+			SPRING_PROFILES_ACTIVE: docker
