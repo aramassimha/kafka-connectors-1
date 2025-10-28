@@ -10,7 +10,7 @@ import org.springframework.web.client.RestTemplate;
 @Service
 public class ConnectorService {
     
-    // ✅ FIXED: Use Docker service name instead of localhost
+ 
     private final RestTemplate restTemplate;
     private final String KAFKA_CONNECT_URL = "http://kafka-connect:8083/connectors";
     
@@ -20,8 +20,7 @@ public class ConnectorService {
     }
     
     public String createMySqlSourceConnector() {
-        
-        // ✅ FIXED: Corrected JSON syntax and class names
+       
         String connectorConfig = """
                 {
                     "name": "mysql-source-connector",
@@ -46,8 +45,7 @@ public class ConnectorService {
     }
     
     public String createPostgreSQLSinkConnector() {
-        
-        // ✅ FIXED: Corrected all issues in PostgreSQL config
+
         String connectorConfig = """
                 {
                     "name": "postgres-sink-connector",
