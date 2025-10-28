@@ -9,7 +9,7 @@ services:
     ports:
       - "2181:2181"
 
-  kafka:  # ✅ FIXED: Remove extra spaces before "kafka:"
+  kafka:  
     image: confluentinc/cp-kafka:6.2.0
     depends_on:
       - zookeeper
@@ -17,7 +17,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
 
-      # ✅ SIMPLE: Use only one listener
+      
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
